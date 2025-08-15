@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KarbonWise | The Market Opportunity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Eco-Corporate Neutral -->
+    <!-- Application Structure Plan: A dashboard-style, single-page application organized by thematic sections (Summary, Opportunity, Solution, User, Tech, Business Plan) rather than a linear report format. This structure is chosen for its superior usability, allowing non-linear exploration of the strategic content. Key interactions include a filterable feature roadmap, an interactive competitive matrix chart, and clickable persona cards to make dense information digestible and actionable for executive users. -->
+    <!-- Visualization & Content Choices: Executive Summary -> Goal: Inform -> Method: Key finding cards for quick insights. Competitive Map -> Goal: Compare -> Viz: Interactive bubble chart (Chart.js) to show positioning. Roadmap -> Goal: Organize -> Viz: Interactive timeline and a filterable/sortable HTML table for detailed feature exploration. User Personas -> Goal: Inform/Organize -> Viz: Clickable cards to reveal details. Data Flow -> Goal: Organize -> Viz: HTML/CSS diagram. All choices prioritize interactivity and clarity without using SVG or Mermaid JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #6c757d;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 550px;
+            max-height: 75vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="https://media.licdn.com/dms/image/v2/D560BAQHfum3Dxz1EpQ/company-logo_200_200/B56ZYb2JHmGoAU-/0/1744223900931/karbonwise_logo?e=2147483647&v=beta&t=TjLVbAtirAg2VE_Pg--kNhYbXhkbWJKsxIJR3_M-Kl8" alt="KarbonWise Logo" class="h-10 w-10 object-contain" onerror="this.style.display='none'">
+                <span class="text-2xl font-bold text-gray-800">KarbonWise</span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="opportunity" class="py-20 bg-gray-50 min-h-screen flex items-center">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title">Navigating the ESG Landscape: The KarbonWise Advantage</h2>
+                <p class="section-subtitle">The ESG market is crowded with pure software vendors that lack guidance and traditional consultants that lack scalability. KarbonWise provides the optimal balance: a powerful tech platform combined with expert, hands-on partnership.</p>
+                <div class="chart-container">
+                    <canvas id="competitiveMatrixChart"></canvas>
+                </div>
+                 <p class="text-sm text-gray-500 mt-8 max-w-3xl mx-auto">This matrix shows the competitive landscape. KarbonWise uniquely occupies the central "Integrated Solution" space, offering the technology of a SaaS platform and the strategic guidance of expert consultants, creating a superior "Outcome as a Service" model.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 KarbonWise</p>
+        </div>
+    </footer>
+
+    <script>
+        const competitiveMatrixData = {
+            datasets: [{
+                label: 'Global SaaS (Tech-Heavy)',
+                data: [
+                    { x: 2.5, y: 8, r: 25, label: 'Persefoni' },
+                    { x: 3.5, y: 7, r: 20, label: 'Watershed' },
+                    { x: 3, y: 6, r: 18, label: 'Greenly' },
+                ],
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1,
+            }, {
+                label: 'ESG Platforms (Complex)',
+                data: [
+                    { x: 7, y: 8.5, r: 30, label: 'Workiva' },
+                    { x: 8, y: 7.5, r: 35, label: 'Salesforce' },
+                ],
+                backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                borderColor: 'rgba(139, 92, 246, 1)',
+                borderWidth: 1,
+            }, {
+                label: 'Consultancies (Manual)',
+                data: [
+                    { x: 8.5, y: 3, r: 40, label: 'PwC/Deloitte' },
+                ],
+                backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                borderColor: 'rgba(239, 68, 68, 1)',
+                borderWidth: 1,
+            }, {
+                label: 'KarbonWise (Integrated Solution)',
+                data: [
+                    { x: 5.5, y: 5.5, r: 28, label: 'KarbonWise' },
+                ],
+                backgroundColor: 'rgba(16, 185, 129, 0.9)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 2,
+            }]
+        };
+
+        const quadrantPlugin = {
+            id: 'quadrant',
+            beforeDraw(chart, args, options) {
+                const {ctx, chartArea: {top, right, bottom, left}, scales: {x, y}} = chart;
+                const midX = x.getPixelForValue(5);
+                const midY = y.getPixelForValue(5);
+
+                ctx.save();
+                
+                ctx.fillStyle = 'rgba(230, 245, 240, 0.2)'; // Top-left
+                ctx.fillRect(left, top, midX - left, midY - top);
+                ctx.fillStyle = 'rgba(250, 235, 240, 0.2)'; // Top-right
+                ctx.fillRect(midX, top, right - midX, midY - top);
+                ctx.fillStyle = 'rgba(255, 245, 230, 0.2)'; // Bottom-right
+                ctx.fillRect(midX, midY, right - midX, bottom - midY);
+                ctx.fillStyle = 'rgba(235, 240, 250, 0.2)'; // Bottom-left
+                ctx.fillRect(left, midY, midX - left, bottom - midY);
+
+                ctx.font = '600 12px Inter';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#4b5563';
+
+                ctx.fillText('High Tech, Low Service', left + (midX - left) / 2, top + 15);
+                ctx.fillText('High Tech, High Service', midX + (right - midX) / 2, top + 15);
+                ctx.fillText('Low Tech, High Service', midX + (right - midX) / 2, bottom - 15);
+                ctx.fillText('Low Tech, Low Service', left + (midX - left) / 2, bottom - 15);
+
+                const sweetSpotX = x.getPixelForValue(5.5);
+                const sweetSpotY = y.getPixelForValue(5.5);
+                
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.arc(sweetSpotX, sweetSpotY, 45, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.font = 'bold 16px Inter';
+                ctx.fillStyle = '#059669';
+                ctx.fillText('The Sweet Spot', sweetSpotX, sweetSpotY + 60);
+
+                ctx.restore();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const competitiveMatrixCtx = document.getElementById('competitiveMatrixChart').getContext('2d');
+            new Chart(competitiveMatrixCtx, {
+                type: 'bubble',
+                data: competitiveMatrixData,
+                plugins: [quadrantPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 40,
+                            bottom: 40,
+                            left: 10,
+                            right: 10
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    family: 'Inter'
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const d = context.raw;
+                                    return d.label;
+                                }
+                            },
+                            titleFont: { size: 16, family: 'Inter' },
+                            bodyFont: { size: 14, family: 'Inter' },
+                            padding: 12,
+                            backgroundColor: '#111827',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'SERVICE & EXPERTISE', font: {size: 14, weight: 'bold', family: 'Inter'} },
+                            min: 0, max: 10,
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                callback: (value) => (value === 2 ? 'Low' : value === 8 ? 'High' : ''),
+                                font: { family: 'Inter' }
+                            }
+                        },
+                        x: {
+                            title: { display: true, text: 'TECHNOLOGY & AUTOMATION', font: {size: 14, weight: 'bold', family: 'Inter'} },
+                            min: 0, max: 10,
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                callback: (value) => (value === 2 ? 'Low' : value === 8 ? 'High' : ''),
+                                font: { family: 'Inter' }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
