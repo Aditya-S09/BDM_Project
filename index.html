@@ -1,235 +1,1147 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KarbonWise | The Market Opportunity</title>
+    <title>Karbonwise ESG Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Eco-Corporate Neutral -->
-    <!-- Application Structure Plan: A dashboard-style, single-page application organized by thematic sections (Summary, Opportunity, Solution, User, Tech, Business Plan) rather than a linear report format. This structure is chosen for its superior usability, allowing non-linear exploration of the strategic content. Key interactions include a filterable feature roadmap, an interactive competitive matrix chart, and clickable persona cards to make dense information digestible and actionable for executive users. -->
-    <!-- Visualization & Content Choices: Executive Summary -> Goal: Inform -> Method: Key finding cards for quick insights. Competitive Map -> Goal: Compare -> Viz: Interactive bubble chart (Chart.js) to show positioning. Roadmap -> Goal: Organize -> Viz: Interactive timeline and a filterable/sortable HTML table for detailed feature exploration. User Personas -> Goal: Inform/Organize -> Viz: Clickable cards to reveal details. Data Flow -> Goal: Organize -> Viz: HTML/CSS diagram. All choices prioritize interactivity and clarity without using SVG or Mermaid JS. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-main: #F9F6F1; /* Warm Off-White */
+            --card-bg: #F9F6F1;
+            --border-color: #EAE3D9;
+            --primary-terracotta: #B85C38;
+            --primary-terracotta-dark: #A04F30;
+            --accent-green: #2C4A3C;
+            --text-dark: #3D4043;
+            --text-light: #7A7D80;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            color: #343a40;
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            overflow: hidden;
         }
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #212529;
-            margin-bottom: 1rem;
-        }
-        .section-subtitle {
-            font-size: 1.125rem;
-            color: #6c757d;
-            max-width: 800px;
-            margin: 0 auto 3rem auto;
-        }
-        .chart-container {
-            position: relative;
+
+        .background-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 550px;
-            max-height: 75vh;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
         }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 600px;
-            }
+
+        @keyframes move-blob {
+            0% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(20vw, 30vh) scale(1.2); }
+            50% { transform: translate(-30vw, 10vh) scale(0.8); }
+            75% { transform: translate(10vw, -20vh) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
         }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.7;
+        }
+
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            top: -150px;
+            left: -150px;
+            background: rgba(184, 92, 56, 0.1);
+            animation: move-blob 50s infinite alternate;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            bottom: -200px;
+            right: -200px;
+            background: rgba(44, 74, 60, 0.1);
+            animation: move-blob 55s infinite alternate-reverse;
+        }
+
+        .main-container { display: flex; }
+        
+        .sidebar {
+            width: 80px;
+            background-color: rgba(249, 246, 241, 0.7);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
+            min-height: 100vh;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+        .sidebar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .sidebar-icon:hover { background-color: #F0EBE4; }
+        .sidebar-icon.active { background-color: var(--primary-terracotta); }
+        .sidebar-icon.active svg { stroke: white; }
+        .sidebar-icon svg { stroke: var(--text-light); transition: stroke 0.3s ease; }
+
+        .content {
+            flex-grow: 1;
+            padding: 3rem 4rem;
+            max-width: calc(100% - 80px);
+            height: 100vh;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .soft-ui-card {
+            background: var(--card-bg);
+            border: 1px solid #FFFFFF;
+            border-radius: 1.25rem;
+            box-shadow: 8px 8px 16px #dcd7cf, -8px -8px 16px #ffffff;
+            transition: all 0.3s ease;
+        }
+        .soft-ui-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 12px 12px 24px #dcd7cf, -12px -12px 24px #ffffff;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-terracotta);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(184, 92, 56, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-terracotta-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 25px rgba(184, 92, 56, 0.4);
+        }
+        .btn-primary:disabled {
+            background: #EAE3D9;
+            color: #B0A89D;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .stage { transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .stage.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; position: absolute; width: calc(100% - 8rem); left: 4rem; }
+        .stage.active { opacity: 1; transform: translateY(0); pointer-events: auto; position: relative; }
+        
+        .form-input, .form-select {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-terracotta);
+            box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.15);
+        }
+
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1); }
+        .accordion-item.active .accordion-content { max-height: 1000px; transition: max-height 1s ease-in-out; }
+        .accordion-item.active .accordion-arrow { transform: rotate(90deg); }
+        .accordion-arrow { transition: transform 0.3s ease; }
+        
+        #neural-animation .node { fill: var(--text-light); animation: pulse 2s infinite alternate; }
+        #neural-animation .line { stroke: #DCD7CF; stroke-width: 1; opacity: 0.8; }
+        @keyframes pulse { from { r: 4; fill: var(--text-light); } to { r: 6; fill: var(--accent-green); } }
+
     </style>
 </head>
-<body class="antialiased">
+<body>
 
-    <header id="header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <img src="https://media.licdn.com/dms/image/v2/D560BAQHfum3Dxz1EpQ/company-logo_200_200/B56ZYb2JHmGoAU-/0/1744223900931/karbonwise_logo?e=2147483647&v=beta&t=TjLVbAtirAg2VE_Pg--kNhYbXhkbWJKsxIJR3_M-Kl8" alt="KarbonWise Logo" class="h-10 w-10 object-contain" onerror="this.style.display='none'">
-                <span class="text-2xl font-bold text-gray-800">KarbonWise</span>
-            </div>
-        </nav>
-    </header>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
-    <main>
-        <section id="opportunity" class="py-20 bg-gray-50 min-h-screen flex items-center">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="section-title">Navigating the ESG Landscape: The KarbonWise Advantage</h2>
-                <p class="section-subtitle">The ESG market is crowded with pure software vendors that lack guidance and traditional consultants that lack scalability. KarbonWise provides the optimal balance: a powerful tech platform combined with expert, hands-on partnership.</p>
-                <div class="chart-container">
-                    <canvas id="competitiveMatrixChart"></canvas>
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+             <div>
+                <div class="p-2 mb-8 text-center">
+                     <svg class="mx-auto" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary-teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13H2a10 10 0 0 0 10 10z"/><path d="M13 4a7 7 0 0 1 7 7h2a10 10 0 0 0-10-10z"/><path d="M6.34 11.66A2 2 0 0 0 8 13h8a2 2 0 0 0 1.66-3.66L14 5H9.3l-2.96 6.66z"/></svg>
+                     <p class="text-xs font-bold text-teal-800 mt-1">Karbonwise</p>
                 </div>
-                 <p class="text-sm text-gray-500 mt-8 max-w-3xl mx-auto">This matrix shows the competitive landscape. KarbonWise uniquely occupies the central "Integrated Solution" space, offering the technology of a SaaS platform and the strategic guidance of expert consultants, creating a superior "Outcome as a Service" model.</p>
+                <div class="sidebar-icon active" id="sidebar-icon-dna">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="sidebar-icon" id="sidebar-icon-plan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                </div>
+                 <div class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
             </div>
-        </section>
-    </main>
-
-    <footer class="bg-gray-800 text-white">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p>&copy; 2025 KarbonWise</p>
+            <div>
+                 <div class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+            </div>
         </div>
-    </footer>
+
+        <main class="content">
+            <!-- STAGE 0: Initial Choice -->
+            <div id="stage0" class="stage active max-w-5xl mx-auto text-center">
+                 <h1 class="text-5xl font-extrabold text-gray-800">Welcome. Let's Begin Your ESG Journey.</h1>
+                 <p class="mt-4 text-lg text-gray-500">Choose your starting point. We'll tailor the experience to your needs.</p>
+                 <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="soft-ui-card p-8 flex flex-col items-center cursor-pointer" onclick="window.switchStage('1')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary-terracotta)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-4"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 10-2.5 2.5 2.5 2.5"/><path d="m14 18 2.5-2.5-2.5-2.5"/></svg>
+                        <h2 class="text-2xl font-bold text-gray-800">Analyze Your DNA</h2>
+                        <p class="mt-2 text-gray-500">Provide your existing reports and URLs for a deep, personalized analysis of your company's unique ESG profile.</p>
+                    </div>
+                    <div class="soft-ui-card p-8 flex flex-col items-center cursor-pointer" onclick="window.switchStage('1b')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary-terracotta)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <h2 class="text-2xl font-bold text-gray-800">Build Your Profile</h2>
+                        <p class="mt-2 text-gray-500">New to ESG? Get an instant strategic briefing and action plan based on your industry and size.</p>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- STAGE 1: DNA Input Portal -->
+            <div id="stage1" class="stage hidden max-w-4xl mx-auto">
+                <button onclick="window.switchStage('0')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to Start
+                </button>
+                <div class="text-center">
+                    <h1 class="text-5xl font-extrabold text-gray-800">Understand Your Company's DNA</h1>
+                    <p class="mt-4 text-lg text-gray-500">Provide public links or documents. Our AI will analyze your unique profile to tailor your entire ESG journey.</p>
+                </div>
+                <div class="mt-10 soft-ui-card p-8 text-left">
+                    <div id="link-inputs-container">
+                        <!-- JS will populate this -->
+                    </div>
+                    <button id="add-link-btn" class="mt-2 text-sm font-semibold text-terracotta-600 hover:text-terracotta-500 transition-colors">+ Add Another Link</button>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="begin-analysis-btn" disabled class="w-full md:w-1/2 btn-primary font-bold py-4 px-4 rounded-xl text-lg">
+                        Begin Analysis
+                    </button>
+                </div>
+            </div>
+
+             <!-- STAGE 1b: Strategic Jumpstart Input -->
+            <div id="stage1b" class="stage hidden max-w-3xl mx-auto">
+                <button onclick="window.switchStage('0')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to Start
+                </button>
+                <div class="text-center">
+                    <h1 class="text-5xl font-extrabold text-gray-800">Create Your Company Profile</h1>
+                    <p class="mt-4 text-lg text-gray-500">Provide some basic details to generate an industry-specific ESG strategic briefing.</p>
+                </div>
+                <div class="mt-10 soft-ui-card p-8 text-left space-y-6">
+                    <div>
+                        <label for="company-name" class="block text-sm font-medium text-gray-600">Company Name</label>
+                        <input type="text" id="company-name" class="form-input mt-1 block w-full rounded-md" placeholder="e.g., Acme Corporation">
+                    </div>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                           <label for="industry" class="block text-sm font-medium text-gray-600">Industry</label>
+                           <select id="industry" class="form-select mt-1 block w-full rounded-md">
+                               <option>IT Services</option>
+                               <option>Pharmaceuticals</option>
+                               <option>Automotive Parts</option>
+                               <option>Textiles</option>
+                               <option>Construction</option>
+                           </select>
+                        </div>
+                        <div>
+                           <label for="company-size" class="block text-sm font-medium text-gray-600">Company Size (Employees)</label>
+                           <select id="company-size" class="form-select mt-1 block w-full rounded-md">
+                               <option>&lt; 500</option>
+                               <option>500 - 5,000</option>
+                               <option>&gt; 5,000</option>
+                           </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="locations" class="block text-sm font-medium text-gray-600">Geographic Locations</label>
+                        <input type="text" id="locations" class="form-input mt-1 block w-full rounded-md" placeholder="e.g., Telangana, India; California, USA">
+                        <p class="text-xs text-gray-400 mt-1">Separate locations with a comma.</p>
+                    </div>
+                     <div>
+                        <label for="focus-area" class="block text-sm font-medium text-gray-600">Primary Focus Area</label>
+                        <select id="focus-area" class="form-select mt-1 block w-full rounded-md">
+                            <option>Carbon Accounting</option>
+                            <option>Supply Chain Decarbonization</option>
+                            <option>Regulatory Compliance</option>
+                            <option>Overall ESG Strategy</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="see-recommendation-btn" class="w-full md:w-1/2 btn-primary font-bold py-4 px-4 rounded-xl text-lg">
+                        See Recommendation
+                    </button>
+                </div>
+            </div>
+
+            <!-- STAGE 2: Analysis in Progress -->
+            <div id="stage2" class="stage hidden max-w-4xl mx-auto text-center">
+                 <h1 class="text-5xl font-extrabold text-gray-800">Analyzing Your Corporate DNA...</h1>
+                 <p class="mt-4 text-lg text-gray-500">Our AI is decoding your strategy, audience, and narrative.</p>
+                 <div class="mt-10 soft-ui-card p-8">
+                     <div class="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-12">
+                        <div id="neural-animation" class="w-[200px] h-[200px]"></div>
+                        <div id="checklist" class="text-lg space-y-4 text-left"></div>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- STAGE 3: Granular DNA Dashboard -->
+            <div id="stage3" class="stage hidden">
+                <button onclick="window.switchStage('1')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to Inputs
+                </button>
+                <h1 class="text-5xl font-extrabold text-gray-800">Your Corporate DNA: A Multi-Faceted Analysis</h1>
+                <p class="mt-2 text-lg text-gray-500">Our AI has decoded your strategy, audience, and narrative to build a truly personalized action plan.</p>
+                
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <!-- Left Column: The "Why" and "Who" -->
+                    <div class="lg:col-span-2 flex flex-col space-y-8">
+                        <div class="soft-ui-card p-6 text-center">
+                            <h2 class="text-xl font-bold text-gray-800 mb-2">Primary ESG Driver</h2>
+                            <p class="text-sm text-gray-500 mb-4">The core motivation behind your strategy.</p>
+                            <div class="relative w-full max-w-[250px] mx-auto">
+                                <svg viewBox="0 0 200 200" class="w-full h-full">
+                                    <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="10"/>
+                                    <text x="100" y="30" text-anchor="middle" font-size="12" fill="var(--text-light)" font-weight="600">Compliance</text>
+                                    <text x="175" y="105" text-anchor="middle" font-size="12" fill="var(--text-light)" font-weight="600">Brand</text>
+                                    <text x="100" y="180" text-anchor="middle" font-size="12" fill="var(--text-light)" font-weight="600">Mission-Led</text>
+                                    <text x="25" y="105" text-anchor="middle" font-size="12" fill="var(--text-light)" font-weight="600">Investor</text>
+                                    <g id="compass-dial" style="transform: rotate(-45deg); transform-origin: center;">
+                                         <path d="M100 20 L110 100 L90 100 Z" fill="var(--accent-gold)"/>
+                                         <circle cx="100" cy="100" r="8" fill="var(--accent-gold)"/>
+                                    </g>
+                                </svg>
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                                     <p class="text-2xl font-bold text-gray-800">Investor-Driven</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="soft-ui-card p-6 text-center">
+                             <h2 class="text-xl font-bold text-gray-800 mb-2">Stakeholder Voice Analysis</h2>
+                             <p class="text-sm text-gray-500 mb-4">Focus distribution in your narrative.</p>
+                             <svg id="radar-chart" class="w-full max-w-[300px] mx-auto"></svg>
+                        </div>
+                         <div class="soft-ui-card p-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-4">Linguistic Fingerprint</h2>
+                            <div class="text-center space-x-2 space-y-2">
+                                <span class="bg-gray-200/50 text-gray-700 text-lg font-bold px-3 py-1 rounded-lg">Risk Mitigation</span>
+                                <span class="bg-gray-200/50 text-gray-700 text-sm font-semibold px-2 py-1 rounded-lg">Compliance</span>
+                                <span class="bg-gray-200/50 text-gray-700 text-xl font-bold px-3 py-1 rounded-lg">Shareholders</span>
+                                <span class="bg-gray-200/50 text-gray-700 text-xs font-semibold px-2 py-1 rounded-lg">TCFD</span>
+                                <span class="bg-gray-200/50 text-gray-700 text-base font-semibold px-2 py-1 rounded-lg">Governance</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: The "What" and "How" -->
+                    <div class="lg:col-span-3">
+                         <div class="soft-ui-card p-6 h-full">
+                             <h2 class="text-xl font-bold text-gray-800 mb-4">Materiality Matrix & Topics</h2>
+                             <p class="text-gray-500 mb-6">Based on your DNA, we recommend focusing on these areas to close strategic gaps and reinforce your core messaging.</p>
+                              <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+                                 <div id="materiality-matrix-dna"></div>
+                                 <div id="recommended-topics" class="space-y-2">
+                                     <!-- JS populates this -->
+                                 </div>
+                             </div>
+ 
+                              <hr class="my-6 border-gray-200">
+
+                            <h2 class="text-xl font-bold text-gray-800 mb-4">Strategic Gap Analysis</h2>
+                            <p class="text-gray-500 mb-6">Aligning what you <span class="text-blue-500 font-semibold">say</span> with what you <span class="text-green-500 font-semibold">do</span>. We've identified potential misalignments between your stated goals and narrative focus.</p>
+                             <div class="space-y-4">
+                                <div class="p-4 bg-green-100/50 border border-green-200 rounded-lg">
+                                    <h4 class="font-bold text-gray-800 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-green-500 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                        Strong Alignment: Climate & Governance
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-2 pl-7">Your stated focus on climate risk is strongly supported by extensive data on GHG emissions and detailed descriptions of board oversight, aligning with your investor-driven motivation.</p>
+                                </div>
+                                <div class="p-4 bg-yellow-100/50 border border-yellow-300 rounded-lg">
+                                    <h4 class="font-bold text-gray-800 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500 mr-2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                        Opportunity: Human Capital
+                                    </h4>
+                                    <p class="text-sm text-gray-600 mt-2 pl-7">You state that 'employees are our greatest asset', but this topic receives 80% less narrative space and data compared to governance issues. This presents an opportunity to strengthen your 'S' pillar narrative.</p>
+                                </div>
+                             </div>
+                             
+                             <hr class="my-6 border-gray-200">
+
+                            <h2 class="text-xl font-bold text-gray-800 mb-4">Select Reporting Frameworks</h2>
+                            <p class="text-gray-500 mb-6">Choose the standards you plan to report against to tailor your metrics.</p>
+                            <div id="framework-selection-dna" class="space-y-4">
+                                <!-- JS will populate this -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="mt-10 bg-gradient-to-r from-teal-500 to-green-500 text-white p-8 rounded-2xl flex items-center justify-between shadow-lg shadow-teal-200/50">
+                    <div>
+                        <h2 class="text-2xl font-bold">Your strategic DNA is decoded.</h2>
+                        <p class="mt-1 opacity-90">Ready to build an action plan that aligns with your core strategy?</p>
+                    </div>
+                    <button class="bg-white text-teal-600 hover:bg-gray-100 transition-all btn-configure-action-plan mt-4 md:mt-0 font-bold py-3 px-6 rounded-xl text-lg shrink-0">Configure Your Action Plan</button>
+                </div>
+            </div>
+            
+            <!-- STAGE 4: Topic Deep Dive Analysis -->
+            <div id="stage4" class="stage hidden">
+                <button onclick="window.switchStage('3')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to DNA Profile
+                </button>
+                <h1 id="detail-title" class="text-5xl font-extrabold text-gray-800"></h1>
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Strategic Relevance</h2><p id="detail-relevance" class="text-gray-600 leading-relaxed"></p></div>
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Actionable Recommendations</h2><div id="detail-actions" class="space-y-3"></div></div>
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Geographic & Regulatory Impact</h2><div id="detail-geo" class="text-gray-600"></div></div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Framework Alignment</h2><div id="detail-frameworks" class="flex flex-wrap gap-2"></div></div>
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Data Requirements & KPIs</h2><div id="detail-kpis" class="space-y-3 text-gray-600"></div></div>
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Risk & Opportunity</h2><div id="detail-risks" class="space-y-4"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 5a: Topic & Framework Selection (for Jumpstart path) -->
+            <div id="stage5a" class="stage hidden">
+                <button onclick="window.switchStage('1b')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to Profile
+                </button>
+                <h1 class="text-5xl font-extrabold text-gray-800">Select Your Focus Areas</h1>
+                <p class="mt-2 text-lg text-gray-500">Based on your industry, we've identified these material topics. Refine your focus and select frameworks to align with.</p>
+                
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="soft-ui-card p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Material Topics for <strong id="industry-name-placeholder" class="text-teal-600"></strong></h2>
+                        <div id="materiality-matrix-jumpstart" class="mb-6"></div>
+                        <div class="space-y-2" id="material-topics-selection">
+                            <!-- JS will populate this with selectable topics -->
+                        </div>
+                    </div>
+                    <div class="soft-ui-card p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Select Reporting Frameworks</h2>
+                        <p class="text-gray-500 mb-4">Choose the standards you plan to report against to tailor your metrics.</p>
+                        <div class="space-y-4" id="framework-selection-jumpstart">
+                            <!-- JS will populate this with checkboxes -->
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="generate-action-plan-btn" class="w-full md:w-1/2 btn-primary font-bold py-4 px-4 rounded-xl text-lg">
+                        Generate Action Plan
+                    </button>
+                </div>
+            </div>
+
+            <!-- STAGE 5 (and 5b): Action Plan -->
+            <div id="stage5" class="stage hidden">
+                <button id="back-to-focus-areas-btn" onclick="window.switchStage('5a')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to Focus Areas
+                </button>
+                 <button id="back-to-dna-btn" onclick="window.switchStage('3')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to DNA Profile
+                </button>
+                <h1 class="text-5xl font-extrabold text-gray-800" id="action-plan-title">Your ESG Action Plan</h1>
+                <p class="mt-2 text-lg text-gray-500" id="action-plan-subtitle">Based on your DNA, these are the key priorities and metrics to focus on.</p>
+                
+                <div id="briefing-section" class="hidden mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="soft-ui-card p-6">
+                         <h2 class="text-2xl font-bold text-gray-800 mb-4">Industry-Wide Goals (Peer Benchmarks)</h2>
+                         <ul class="space-y-3">
+                            <li class="flex items-start text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-3 mt-1 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span id="benchmark-goal-1"></span></li>
+                             <li class="flex items-start text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-3 mt-1 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span id="benchmark-goal-2"></span></li>
+                         </ul>
+                    </div>
+                    <div class="soft-ui-card p-6">
+                         <h2 class="text-2xl font-bold text-gray-800 mb-4">Strategic Priorities</h2>
+                         <ul class="space-y-3">
+                            <li class="flex items-start text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500 mr-3 mt-1 shrink-0"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg><span id="priority-1"></span></li>
+                             <li class="flex items-start text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-500 mr-3 mt-1 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span id="priority-2"></span></li>
+                         </ul>
+                    </div>
+                </div>
+                <div class="mt-8 space-y-8" id="action-plan-container">
+                    <!-- JS will populate this section -->
+                </div>
+            </div>
+
+            <!-- STAGE 6: Metric Deep Dive -->
+            <div id="stage6" class="stage hidden">
+                 <button onclick="window.switchStage('5')" class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to Action Plan
+                </button>
+                <h1 id="metric-detail-title" class="text-5xl font-extrabold text-gray-800"></h1>
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Strategic Rationale</h2><p id="metric-detail-relevance" class="text-gray-600 leading-relaxed"></p></div>
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Peer Benchmarking</h2><p id="metric-detail-benchmark-desc" class="text-sm text-gray-500 mb-4"></p><div id="metric-detail-benchmark-chart"></div></div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Geographic & Regulatory Requirements</h2><div id="metric-detail-geo"></div></div>
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Framework Alignment</h2><div id="metric-detail-frameworks" class="flex flex-wrap gap-2"></div></div>
+                        <div class="soft-ui-card p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Data Collection Guidance</h2><div id="metric-detail-kpis" class="space-y-3 text-gray-600"></div></div>
+                    </div>
+                </div>
+
+        </main>
+    </div>
 
     <script>
-        const competitiveMatrixData = {
-            datasets: [{
-                label: 'Global SaaS (Tech-Heavy)',
-                data: [
-                    { x: 2.5, y: 8, r: 25, label: 'Persefoni' },
-                    { x: 3.5, y: 7, r: 20, label: 'Watershed' },
-                    { x: 3, y: 6, r: 18, label: 'Greenly' },
+    (() => {
+        // --- DATA MOCKS ---
+        const materialTopicsData = [
+            { id: 1, name: 'Climate Risk & TCFD Reporting', business: 0.9, society: 0.8, type: 'REINFORCE', color: 'red' },
+            { id: 2, name: 'Board & ESG Governance', business: 0.8, society: 0.6, type: 'REINFORCE', color: 'red' },
+            { id: 3, name: 'Employee Training & Development', business: 0.5, society: 0.7, type: 'ADDRESS GAP', color: 'yellow' },
+            { id: 4, name: 'Diversity & Inclusion Metrics', business: 0.4, society: 0.8, type: 'ADDRESS GAP', color: 'yellow' },
+        ];
+        
+        const jumpstartTopicsData = [
+            { id: 1, name: 'Climate & Energy', business: 0.85, society: 0.9 },
+            { id: 2, name: 'Water & Wastewater', business: 0.6, society: 0.75 },
+            { id: 3, name: 'Waste Management', business: 0.5, society: 0.5 },
+            { id: 4, name: 'Human Capital', business: 0.7, society: 0.8 },
+            { id: 5, name: 'Diversity & Inclusion', business: 0.4, society: 0.85 },
+            { id: 6, name: 'Board & Oversight', business: 0.9, society: 0.6 },
+        ];
+        
+        // Industry Specific Data
+        const industryBriefings = {
+            'IT Services': {
+                goals: [
+                    "Achieve carbon neutrality for data center operations by 2030.",
+                    "Source 100% renewable energy for global operations by 2035."
                 ],
-                backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                borderColor: 'rgba(59, 130, 246, 1)',
-                borderWidth: 1,
-            }, {
-                label: 'ESG Platforms (Complex)',
-                data: [
-                    { x: 7, y: 8.5, r: 30, label: 'Workiva' },
-                    { x: 8, y: 7.5, r: 35, label: 'Salesforce' },
+                priorities: [
+                    "<strong>Regulatory Watchlist:</strong> EU's upcoming Corporate Sustainability Due Diligence Directive (CSDDD).",
+                    "<strong>Quick Win:</strong> Implement a Green IT training program for all employees to reduce energy consumption from endpoints."
+                ]
+            },
+            'Default': {
+                goals: [
+                    "Achieve a 25% reduction in Scope 1 & 2 emissions by 2030.",
+                    "Ensure 95% of Tier-1 suppliers are audited for labor practices."
                 ],
-                backgroundColor: 'rgba(139, 92, 246, 0.7)',
-                borderColor: 'rgba(139, 92, 246, 1)',
-                borderWidth: 1,
-            }, {
-                label: 'Consultancies (Manual)',
-                data: [
-                    { x: 8.5, y: 3, r: 40, label: 'PwC/Deloitte' },
-                ],
-                backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                borderColor: 'rgba(239, 68, 68, 1)',
-                borderWidth: 1,
-            }, {
-                label: 'KarbonWise (Integrated Solution)',
-                data: [
-                    { x: 5.5, y: 5.5, r: 28, label: 'KarbonWise' },
-                ],
-                backgroundColor: 'rgba(16, 185, 129, 0.9)',
-                borderColor: 'rgba(16, 185, 129, 1)',
-                borderWidth: 2,
-            }]
-        };
-
-        const quadrantPlugin = {
-            id: 'quadrant',
-            beforeDraw(chart, args, options) {
-                const {ctx, chartArea: {top, right, bottom, left}, scales: {x, y}} = chart;
-                const midX = x.getPixelForValue(5);
-                const midY = y.getPixelForValue(5);
-
-                ctx.save();
-                
-                ctx.fillStyle = 'rgba(230, 245, 240, 0.2)'; // Top-left
-                ctx.fillRect(left, top, midX - left, midY - top);
-                ctx.fillStyle = 'rgba(250, 235, 240, 0.2)'; // Top-right
-                ctx.fillRect(midX, top, right - midX, midY - top);
-                ctx.fillStyle = 'rgba(255, 245, 230, 0.2)'; // Bottom-right
-                ctx.fillRect(midX, midY, right - midX, bottom - midY);
-                ctx.fillStyle = 'rgba(235, 240, 250, 0.2)'; // Bottom-left
-                ctx.fillRect(left, midY, midX - left, bottom - midY);
-
-                ctx.font = '600 12px Inter';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#4b5563';
-
-                ctx.fillText('High Tech, Low Service', left + (midX - left) / 2, top + 15);
-                ctx.fillText('High Tech, High Service', midX + (right - midX) / 2, top + 15);
-                ctx.fillText('Low Tech, High Service', midX + (right - midX) / 2, bottom - 15);
-                ctx.fillText('Low Tech, Low Service', left + (midX - left) / 2, bottom - 15);
-
-                const sweetSpotX = x.getPixelForValue(5.5);
-                const sweetSpotY = y.getPixelForValue(5.5);
-                
-                ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([4, 4]);
-                ctx.beginPath();
-                ctx.arc(sweetSpotX, sweetSpotY, 45, 0, 2 * Math.PI);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                ctx.font = 'bold 16px Inter';
-                ctx.fillStyle = '#059669';
-                ctx.fillText('The Sweet Spot', sweetSpotX, sweetSpotY + 60);
-
-                ctx.restore();
+                priorities: [
+                    "<strong>Regulatory Watchlist:</strong> India's upcoming Extended Producer Responsibility (EPR) rules.",
+                    "<strong>Quick Win:</strong> Implement energy-efficient lighting across facilities for immediate cost and emission savings."
+                ]
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const competitiveMatrixCtx = document.getElementById('competitiveMatrixChart').getContext('2d');
-            new Chart(competitiveMatrixCtx, {
-                type: 'bubble',
-                data: competitiveMatrixData,
-                plugins: [quadrantPlugin],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            top: 40,
-                            bottom: 40,
-                            left: 10,
-                            right: 10
-                        }
-                    },
-                    plugins: {
-                        legend: { 
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    size: 14,
-                                    family: 'Inter'
-                                },
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const d = context.raw;
-                                    return d.label;
-                                }
-                            },
-                            titleFont: { size: 16, family: 'Inter' },
-                            bodyFont: { size: 14, family: 'Inter' },
-                            padding: 12,
-                            backgroundColor: '#111827',
-                            titleColor: '#ffffff',
-                            bodyColor: '#ffffff',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            title: { display: true, text: 'SERVICE & EXPERTISE', font: {size: 14, weight: 'bold', family: 'Inter'} },
-                            min: 0, max: 10,
-                            grid: { drawOnChartArea: false },
-                            ticks: {
-                                callback: (value) => (value === 2 ? 'Low' : value === 8 ? 'High' : ''),
-                                font: { family: 'Inter' }
-                            }
-                        },
-                        x: {
-                            title: { display: true, text: 'TECHNOLOGY & AUTOMATION', font: {size: 14, weight: 'bold', family: 'Inter'} },
-                            min: 0, max: 10,
-                            grid: { drawOnChartArea: false },
-                            ticks: {
-                                callback: (value) => (value === 2 ? 'Low' : value === 8 ? 'High' : ''),
-                                font: { family: 'Inter' }
-                            }
-                        }
+        const topicDetails = {
+            'Climate Risk & TCFD Reporting': {
+                relevance: 'As an investor-driven company, robust TCFD reporting is non-negotiable. It directly addresses the primary concerns of shareholders and financial institutions regarding climate-related financial risks and opportunities, ensuring you meet market expectations.',
+                frameworks: ['TCFD', 'GRI 201', 'ESRS E1', 'CDP'],
+                geo: `<p>No specific state-level mandates currently, but upcoming national regulations on climate disclosure will make this mandatory.</p>`,
+                actions: [
+                    'Conduct a scenario analysis for a 2°C and 1.5°C future.',
+                    'Quantify financial impacts of identified physical and transition risks.',
+                    'Integrate TCFD recommendations into your mainstream financial filings.'
+                ],
+                kpis: [
+                    'Scope 1, 2, and 3 GHG Emissions (tCO2e)',
+                    'Percentage of assets vulnerable to physical climate risk',
+                    'Capital expenditure aligned with climate transition ($)'
+                ],
+                risks: {
+                    'Risks of Inaction': 'Lower valuation from investors, exclusion from ESG funds, and potential for shareholder resolutions demanding better disclosure.',
+                    'Opportunities for Leadership': 'Attract climate-focused capital, identify new low-carbon business opportunities, and improve long-term strategic resilience.'
+                }
+            },
+            'Default': {
+                relevance: 'This is a key performance indicator for your industry, reflecting a commitment to sustainable practices and responsible resource management. Tracking this metric helps mitigate risks and aligns with stakeholder expectations for environmental stewardship.',
+                frameworks: ['GRI', 'BRSR', 'ESRS', 'SASB', 'CDP'],
+                geo: '<p>No specific state-level mandates were flagged for your current operational regions, but this remains a best practice for federal compliance and social license to operate.</p>',
+                actions: ['Define scope and boundaries for data collection.', 'Assign ownership for the metric to a specific department.', 'Integrate data collection into existing operational workflows.'],
+                kpis: ['Primary KPI (Unit)', 'Secondary KPI (Unit)', 'Contextual KPI (Unit)'],
+                risks: {
+                    'Risks of Inaction': 'Falling behind industry peers, potential exclusion from ESG-focused investment funds, and missing opportunities for operational improvement.',
+                    'Opportunities for Leadership': 'Becoming an industry leader in sustainability, strengthening brand loyalty, and improving long-term business resilience.'
+                }
+            }
+        };
+        
+        const actionPlanData = {
+            'Default': {
+                'Environment': {
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><path d="M11 20A7 7 0 0 1 4 13H2a10 10 0 0 0 10 10z"/><path d="M13 4a7 7 0 0 1 7 7h2a10 10 0 0 0-10-10z"/><path d="M6.34 11.66A2 2 0 0 0 8 13h8a2 2 0 0 0 1.66-3.66L14 5H9.3l-2.96 6.66z"/></svg>`,
+                    priorities: {
+                        'Climate & Energy': { metrics: [{ name: 'Scope 1 GHG Emissions', unit: 'tCO2e' }, { name: 'Scope 2 GHG Emissions', unit: 'tCO2e' }], goals: ["Set a science-based target to reduce Scope 1 & 2 emissions by 30% by 2030."] },
+                        'Water & Wastewater': { metrics: [{ name: 'Total water withdrawal', unit: 'Megaliters' }], goals: ["Reduce water intensity per unit of production by 15% from a 2024 baseline."] },
                     }
+                },
+                'Social': {
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+                    priorities: { 'Human Capital': { metrics: [{ name: 'Voluntary turnover rate', unit: '%' }], goals: ["Reduce voluntary turnover by 10% in the next 24 months through targeted engagement programs."] } }
+                },
+                'Governance': {
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+                    priorities: { 'Board & Oversight': { metrics: [{ name: 'Board independence', unit: '%' }], goals: ["Achieve 50% gender and ethnic diversity at the board level by 2027."] } }
+                }
+            },
+            'IT Services': {
+                 'Environment': {
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><path d="M11 20A7 7 0 0 1 4 13H2a10 10 0 0 0 10 10z"/><path d="M13 4a7 7 0 0 1 7 7h2a10 10 0 0 0-10-10z"/><path d="M6.34 11.66A2 2 0 0 0 8 13h8a2 2 0 0 0 1.66-3.66L14 5H9.3l-2.96 6.66z"/></svg>`,
+                    priorities: {
+                        'Climate & Energy': { 
+                            metrics: [
+                                { name: 'Scope 1, 2, & 3 GHG Emissions', unit: 'tCO2e' }, 
+                                { name: 'Data Center PUE', unit: 'Ratio' },
+                                { name: '% Renewable Energy', unit: '%' }
+                            ], 
+                            goals: ["Achieve carbon neutrality for data center operations by 2030 (CDP Climate).", "Source 100% renewable energy for global operations by 2035."] 
+                        },
+                        'Circular Economy': { 
+                            metrics: [{ name: 'E-waste Recycled', unit: 'Tons' }], 
+                            goals: ["Establish a circular economy model for hardware, increasing e-waste recycling rate to 95%."] 
+                        },
+                    }
+                },
+                'Social': {
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+                    priorities: { 'Data Privacy & Security': { metrics: [{ name: 'Data privacy incidents', unit: 'Number' }], goals: ["Maintain zero significant data breaches per year."] } }
+                },
+                 'Governance': {
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+                    priorities: { 'Board & Oversight': { metrics: [{ name: 'ESG-linked Compensation', unit: '%' }], goals: ["Link 25% of executive variable compensation to CDP score improvements and other ESG targets."] } }
+                }
+            }
+        };
+
+        const metricDetails = {
+            'Total water withdrawal': {
+                relevance: 'For a company with operations in water-stressed regions like Telangana, tracking total water withdrawal is a business imperative. It demonstrates proactive management of a critical resource, mitigates regulatory and operational risks, and signals to investors that you are resilient to climate-related impacts.',
+                benchmarkDesc: 'Annual water withdrawal intensity for the Automotive Parts sector in Asia.',
+                benchmarkChartHTML: `<div class="w-full bg-gray-100 rounded-lg p-4 space-y-3">
+                    <div class="flex items-center"><div class="w-1/4 text-sm">Top Quartile</div><div class="flex-1 bg-gray-200 h-4 rounded-full"><div class="bg-green-400 h-4 rounded-full" style="width: 30%;"></div></div><div class="w-16 text-right text-sm">3.5 m³/unit</div></div>
+                    <div class="flex items-center"><div class="w-1/4 text-sm font-bold text-yellow-600">Your Co. (Est.)</div><div class="flex-1 bg-gray-200 h-4 rounded-full"><div class="bg-yellow-400 h-4 rounded-full" style="width: 55%;"></div></div><div class="w-16 text-right text-sm font-bold">5.8 m³/unit</div></div>
+                    <div class="flex items-center"><div class="w-1/4 text-sm">Industry Median</div><div class="flex-1 bg-gray-200 h-4 rounded-full"><div class="bg-blue-400 h-4 rounded-full" style="width: 50%;"></div></div><div class="w-16 text-right text-sm">5.2 m³/unit</div></div>
+                </div>`,
+                geo: `<div class="flex items-start"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-3 shrink-0 mt-1"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> <span>Your operations in <strong>Telangana</strong> are subject to the State Water, Land and Trees Act (WALTA), which mandates reporting of all water withdrawal from ground and surface sources. Accurate tracking is required for compliance.</span></div>`,
+                frameworks: ['GRI 303-3', 'SASB CG-AA-140a.1', 'BRSR Principle 2', 'CDP Water'],
+                kpis: [
+                    'Water bills from municipal sources (Megaliters)',
+                    'Meter readings from groundwater wells (Megaliters)',
+                    'Total production volume (Units)',
+                ]
+            },
+             'Default': { 
+                relevance: 'This metric is a standard for your industry, reflecting good practice and stakeholder expectations.',
+                benchmarkDesc: 'Peer performance comparison.',
+                benchmarkChartHTML: `<div class="text-gray-400">No specific benchmark data available.</div>`,
+                geo: '<div>No specific geographic requirements identified.</div>',
+                frameworks: ['GRI', 'SASB', 'CDP'],
+                kpis: ['Primary data point (Unit)', 'Secondary data point (Unit)']
+             }
+        };
+        
+        // --- GLOBAL FUNCTIONS ---
+        const stages = {
+            '0': document.getElementById('stage0'), '1': document.getElementById('stage1'),
+            '1b': document.getElementById('stage1b'), '2': document.getElementById('stage2'),
+            '3': document.getElementById('stage3'), '4': document.getElementById('stage4'),
+            '5a': document.getElementById('stage5a'), '5': document.getElementById('stage5'),
+            '6': document.getElementById('stage6'),
+        };
+
+        window.switchStage = (toStageKey) => {
+            document.querySelector('.content').scrollTo(0, 0);
+            Object.values(stages).forEach(stage => {
+                if(stage) {
+                    stage.classList.remove('active');
+                    stage.classList.add('hidden');
                 }
             });
+            if (stages[toStageKey]) {
+                stages[toStageKey].classList.add('active');
+                stages[toStageKey].classList.remove('hidden');
+            }
+        };
+        
+        window.showMetricDetailView = (metricName) => {
+            const details = metricDetails[metricName] || metricDetails['Default'];
+            document.getElementById('metric-detail-title').textContent = metricName;
+            document.getElementById('metric-detail-relevance').textContent = details.relevance;
+            document.getElementById('metric-detail-benchmark-desc').textContent = details.benchmarkDesc;
+            document.getElementById('metric-detail-benchmark-chart').innerHTML = details.benchmarkChartHTML;
+            document.getElementById('metric-detail-geo').innerHTML = details.geo;
+            const frameworksContainer = document.getElementById('metric-detail-frameworks');
+            frameworksContainer.innerHTML = '';
+            details.frameworks.forEach(fw => {
+                const tag = document.createElement('span');
+                tag.className = 'text-sm font-semibold bg-gray-200/50 text-gray-700 px-3 py-1 rounded-full';
+                tag.textContent = fw;
+                frameworksContainer.appendChild(tag);
+            });
+            const kpisContainer = document.getElementById('metric-detail-kpis');
+            kpisContainer.innerHTML = '';
+            details.kpis.forEach(kpi => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center';
+                item.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 text-blue-500"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> <span>${kpi}</span>`;
+                kpisContainer.appendChild(item);
+            });
+            switchStage('6');
+        };
+        
+        window.showDetailView = (topicName) => {
+            const details = topicDetails[topicName] || topicDetails.Default;
+            document.getElementById('detail-title').textContent = `Deep Dive: ${topicName}`;
+            document.getElementById('detail-relevance').textContent = details.relevance;
+            
+            const frameworksContainer = document.getElementById('detail-frameworks');
+            if(frameworksContainer) {
+                frameworksContainer.innerHTML = '';
+                details.frameworks.forEach(fw => {
+                    const tag = document.createElement('span');
+                    tag.className = 'text-sm font-semibold bg-gray-200/50 text-gray-700 px-3 py-1 rounded-full';
+                    tag.textContent = fw;
+                    frameworksContainer.appendChild(tag);
+                });
+            }
+            
+            const detailGeo = document.getElementById('detail-geo');
+            if (detailGeo) detailGeo.innerHTML = details.geo;
+            
+            const actionsContainer = document.getElementById('detail-actions');
+            if(actionsContainer) {
+                actionsContainer.innerHTML = '';
+                details.actions.forEach(action => {
+                    const item = document.createElement('div');
+                    item.className = 'flex items-start';
+                    item.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-3 shrink-0 mt-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${action}</span>`;
+                    actionsContainer.appendChild(item);
+                });
+            }
+
+            const kpisContainer = document.getElementById('detail-kpis');
+            if(kpisContainer) {
+                kpisContainer.innerHTML = '';
+                details.kpis.forEach(kpi => {
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center';
+                    item.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 text-blue-500"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg> <span>${kpi}</span>`;
+                    kpisContainer.appendChild(item);
+                });
+            }
+            
+            const risksContainer = document.getElementById('detail-risks');
+            if (risksContainer) {
+                risksContainer.innerHTML = `
+                    <div>
+                        <h3 class="font-semibold text-red-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>Risks of Inaction</h3>
+                        <p class="text-sm text-gray-500 mt-1 pl-6">${details.risks['Risks of Inaction']}</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-green-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m5 12 5 5L20 7"/></svg>Opportunities for Leadership</h3>
+                        <p class="text-sm text-gray-500 mt-1 pl-6">${details.risks['Opportunities for Leadership']}</p>
+                    </div>
+                `;
+            }
+
+            switchStage('4');
+        }
+
+        window.removeLinkInput = (id) => {
+            document.getElementById(`link-input-${id}`).remove();
+            checkInputs();
+            updateRemoveButtons();
+        }
+        
+        function checkInputs() {
+            const linkInputsContainer = document.getElementById('link-inputs-container');
+            const beginAnalysisBtn = document.getElementById('begin-analysis-btn');
+            if(!linkInputsContainer || !beginAnalysisBtn) return;
+            const inputs = linkInputsContainer.querySelectorAll('input[type="url"]');
+            beginAnalysisBtn.disabled = ![...inputs].some(input => input.value.trim() !== '');
+        }
+
+        function updateRemoveButtons() {
+            const linkInputsContainer = document.getElementById('link-inputs-container');
+            if(!linkInputsContainer) return;
+            const inputs = linkInputsContainer.children;
+            if (inputs.length <= 1) {
+                if (inputs[0]) inputs[0].querySelector('.remove-btn').style.display = 'none';
+            } else {
+                for(let i = 0; i < inputs.length; i++) {
+                    inputs[i].querySelector('.remove-btn').style.display = 'block';
+                }
+            }
+        }
+            
+        function addNewLinkInput() {
+            const linkInputsContainer = document.getElementById('link-inputs-container');
+            if(!linkInputsContainer) return;
+            const id = linkInputsContainer.children.length;
+            const newDiv = document.createElement('div');
+            newDiv.className = 'flex items-end space-x-4 mb-4';
+            newDiv.id = `link-input-${id}`;
+            newDiv.innerHTML = `
+                <div class="flex-grow">
+                    <label for="url-${id}" class="block text-sm font-medium text-gray-500">Document URL</label>
+                    <input type="url" name="url[]" id="url-${id}" class="form-input mt-1 block w-full px-3 py-2 rounded-md shadow-sm placeholder-gray-400 sm:text-sm" placeholder="https://yourcompany.com/annual-report.pdf">
+                </div>
+                <div class="w-1/3">
+                    <label for="type-${id}" class="block text-sm font-medium text-gray-500">Document Type</label>
+                    <select id="type-${id}" name="type[]" class="form-select mt-1 block w-full pl-3 pr-10 py-2 sm:text-sm rounded-md"><option>Annual Report</option><option>Website</option><option>Investor Call</option><option>Policy</option></select>
+                </div>
+                <button class="remove-btn p-2 text-gray-400 hover:text-red-500 transition-colors" onclick="removeLinkInput(${id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            `;
+            linkInputsContainer.appendChild(newDiv);
+            newDiv.querySelector('input[type="url"]').addEventListener('input', checkInputs);
+            updateRemoveButtons();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM ELEMENT CONSTANTS ---
+            const addLinkBtn = document.getElementById('add-link-btn');
+            const beginAnalysisBtn = document.getElementById('begin-analysis-btn');
+            const seeRecommendationBtn = document.getElementById('see-recommendation-btn');
+            const configurePlanBtn = document.querySelector('#stage3 .btn-configure-action-plan');
+            const generateActionPlanBtn = document.getElementById('generate-action-plan-btn');
+           
+            // --- UI BUILDING FUNCTIONS ---
+            function createMaterialityMatrix(containerId, topics) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                const highImpactBg = 'rgba(0, 90, 91, 0.1)'; 
+                const mediumImpactBg = 'rgba(0, 90, 91, 0.05)';
+                const lowImpactBg = 'rgba(0, 90, 91, 0.02)';
+
+                const gridLayout = `
+                    <div class="flex text-sm text-gray-500">
+                        <div class="flex flex-col justify-between items-end pr-2 py-4 h-[300px] relative">
+                            <span class="absolute top-1/2 -left-6 -translate-y-1/2 text-xs font-bold text-gray-400" style="writing-mode: vertical-rl; transform: rotate(180deg);">Impact on Society →</span>
+                            <span class="text-xs font-semibold">High</span>
+                            <span class="text-xs font-semibold">Medium</span>
+                            <span class="text-xs font-semibold">Low</span>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="relative w-full h-[300px] border-l border-b border-gray-200">
+                                <div class="absolute w-full h-full grid grid-cols-3 grid-rows-3">
+                                    <div style="background-color: ${mediumImpactBg};"></div><div style="background-color: ${highImpactBg};"></div><div style="background-color: ${highImpactBg};"></div>
+                                    <div style="background-color: ${lowImpactBg};"></div><div style="background-color: ${mediumImpactBg};"></div><div style="background-color: ${mediumImpactBg};"></div>
+                                    <div style="background-color: ${lowImpactBg};"></div><div style="background-color: ${lowImpactBg};"></div><div style="background-color: ${mediumImpactBg};"></div>
+                                </div>
+                                <div class="absolute w-full h-full grid grid-cols-3 grid-rows-3">
+                                    <div class="border-r border-b border-gray-200"></div><div class="border-r border-b border-gray-200"></div><div class="border-b border-gray-200"></div>
+                                    <div class="border-r border-b border-gray-200"></div><div class="border-r border-b border-gray-200"></div><div class="border-b border-gray-200"></div>
+                                    <div class="border-r border-gray-200"></div><div class="border-r border-gray-200"></div><div></div>
+                                </div>
+                                <div class="absolute w-full h-full">
+                                ${topics.map(topic => `
+                                    <div class="absolute w-7 h-7 flex items-center justify-center rounded-full bg-teal-500 shadow-lg border-2 border-white/50 text-white font-bold text-sm cursor-pointer hover:scale-110 transition-transform" 
+                                         style="left: calc(${topic.business * 100}%); top: calc(${(1 - topic.society) * 100}%); transform: translate(-50%, -50%);"
+                                         title="${topic.name}">
+                                        ${topic.id}
+                                    </div>
+                                `).join('')}
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 text-center mt-2 ml-[1px]">
+                                <span class="text-xs font-semibold">Low</span>
+                                <span class="text-xs font-semibold">Medium</span>
+                                <span class="text-xs font-semibold">High</span>
+                            </div>
+                            <div class="text-center mt-1 text-xs font-bold text-gray-400">
+                                <span>Impact on Business →</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = gridLayout;
+            }
+
+            function buildActionPlan(industry) {
+                const container = document.getElementById('action-plan-container');
+                const planData = actionPlanData[industry] || actionPlanData['Default'];
+                container.innerHTML = '';
+
+                const briefingData = industryBriefings[industry] || industryBriefings['Default'];
+                document.getElementById('benchmark-goal-1').textContent = briefingData.goals[0];
+                document.getElementById('benchmark-goal-2').textContent = briefingData.goals[1];
+                document.getElementById('priority-1').innerHTML = briefingData.priorities[0];
+                document.getElementById('priority-2').innerHTML = briefingData.priorities[1];
+
+
+                Object.entries(planData).forEach(([pillar, data]) => {
+                    const pillarEl = document.createElement('div');
+                    pillarEl.className = 'soft-ui-card p-6';
+                    let prioritiesHTML = '';
+                    Object.entries(data.priorities).forEach(([priority, priorityData]) => {
+                        let metricsHTML = '<div class="space-y-2">';
+                        priorityData.metrics.forEach(metric => {
+                            metricsHTML += `<div class="flex justify-between items-center p-3 hover:bg-gray-100/50 rounded-lg cursor-pointer" onclick="showMetricDetailView('${metric.name}')">
+                                <span class="font-semibold text-gray-700">${metric.name}</span>
+                                <span class="text-sm text-gray-500 bg-gray-200/50 px-2 py-1 rounded">${metric.unit}</span>
+                            </div>`;
+                        });
+                        metricsHTML += '</div>';
+
+                        let goalsHTML = '<ul class="space-y-3">';
+                        priorityData.goals.forEach(goal => {
+                            goalsHTML += `<li class="flex items-start text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-500 mr-3 mt-1 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>${goal}</span></li>`;
+                        });
+                        goalsHTML += '</ul>';
+
+                        prioritiesHTML += `<div class="accordion-item mt-4 border border-gray-200 rounded-lg">
+                            <div class="accordion-header flex justify-between items-center p-4 cursor-pointer">
+                                <h4 class="text-lg font-bold text-gray-800">${priority}</h4>
+                                <div class="accordion-arrow transform transition-transform"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="accordion-content p-4 border-t border-gray-200">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                    <div>
+                                        <h5 class="font-bold text-gray-600 mb-3">Suggested Metrics</h5>
+                                        ${metricsHTML}
+                                    </div>
+                                    <div class="border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-8">
+                                        <h5 class="font-bold text-gray-600 mb-3">Suggested Goals & Priorities</h5>
+                                        ${goalsHTML}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                    pillarEl.innerHTML = `<h2 class="text-3xl font-bold text-gray-800 flex items-center">${data.icon} <span class="ml-3">${pillar}</span></h2>${prioritiesHTML}`;
+                    container.appendChild(pillarEl);
+                });
+
+                container.querySelectorAll('.accordion-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        header.parentElement.classList.toggle('active');
+                    });
+                });
+            }
+
+            function createRadarChart() {
+                const svg = document.getElementById('radar-chart');
+                if (!svg) return;
+                svg.innerHTML = '';
+                const size = 280, center = size / 2, radius = size * 0.3;
+                const labels = ['Investors', 'Customers', 'Employees', 'Regulators'];
+                const data = [0.85, 0.4, 0.3, 0.6];
+                
+                svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+
+                for (let i = 1; i <= 4; i++) {
+                    const r = radius * (i / 4);
+                    let points = labels.map((_, j) => {
+                        const angle = (Math.PI * 2 * j) / labels.length - Math.PI / 2;
+                        return `${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`;
+                    }).join(' ');
+                    const polygon = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    polygon.setAttribute('points', points);
+                    polygon.setAttribute('fill', 'none');
+                    polygon.setAttribute('stroke', 'rgba(0, 0, 0, 0.1)');
+                    svg.appendChild(polygon);
+                }
+
+                labels.forEach((label, i) => {
+                    const angle = (Math.PI * 2 * i) / labels.length - Math.PI / 2;
+                    const text = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+                    const padding = 20;
+                    text.setAttribute('x', center + (radius + padding) * Math.cos(angle));
+                    text.setAttribute('y', center + (radius + padding) * Math.sin(angle));
+                    text.textContent = label;
+                    text.setAttribute('fill', 'var(--text-light)');
+                    text.setAttribute('font-size', '14');
+                    text.setAttribute('font-weight', '600');
+                    text.setAttribute('alignment-baseline', 'middle');
+                    
+                    if (Math.abs(Math.cos(angle)) < 0.1) text.setAttribute('text-anchor', 'middle');
+                    else if (Math.cos(angle) > 0) text.setAttribute('text-anchor', 'start');
+                    else text.setAttribute('text-anchor', 'end');
+
+                    svg.appendChild(text);
+                });
+
+                let dataPoints = data.map((value, i) => {
+                    const angle = (Math.PI * 2 * i) / labels.length - Math.PI / 2;
+                    return `${center + radius * value * Math.cos(angle)},${center + radius * value * Math.sin(angle)}`;
+                }).join(' ');
+                const dataPolygon = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                dataPolygon.setAttribute('points', dataPoints);
+                dataPolygon.setAttribute('fill', 'rgba(0, 90, 91, 0.2)');
+                dataPolygon.setAttribute('stroke', 'var(--primary-teal)');
+                dataPolygon.setAttribute('stroke-width', '2');
+                svg.appendChild(dataPolygon);
+            }
+
+            function buildFrameworkSelector(containerId) {
+                const frameworks = ['GRI', 'BRSR (India)', 'ESRS (Europe)', 'SASB', 'CDP'];
+                const frameworksContainer = document.getElementById(containerId);
+                frameworksContainer.innerHTML = '';
+                frameworks.forEach(fw => {
+                    frameworksContainer.innerHTML += `
+                         <label class="flex items-center p-3 bg-white rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-200">
+                            <input type="checkbox" class="h-5 w-5 rounded text-teal-600 focus:ring-teal-500 border-gray-300" checked>
+                            <span class="ml-3 font-semibold text-gray-700">${fw}</span>
+                        </label>
+                    `;
+                });
+            }
+
+            function buildJumpstartSelectors() {
+                const industry = document.getElementById('industry').value;
+                document.getElementById('industry-name-placeholder').textContent = industry;
+
+                const topicsContainer = document.getElementById('material-topics-selection');
+                topicsContainer.innerHTML = '';
+                jumpstartTopicsData.forEach(topic => {
+                    topicsContainer.innerHTML += `
+                        <div class="flex items-center p-2 bg-gray-100/50 rounded-lg">
+                            <span class="font-bold text-sm text-teal-600 w-6 text-center">${topic.id}.</span>
+                            <span class="ml-2 font-semibold text-sm text-gray-700">${topic.name}</span>
+                        </div>
+                    `;
+                });
+                
+                createMaterialityMatrix('materiality-matrix-jumpstart', jumpstartTopicsData);
+                buildFrameworkSelector('framework-selection-jumpstart');
+            }
+            
+            function createNeuralNet() {
+                const svg = document.getElementById('neural-animation');
+                if(!svg) return;
+                svg.innerHTML = '';
+                const ns = "http://www.w3.org/2000/svg";
+                const points = [[{x:20, y:50},{x:20, y:100},{x:20, y:150}],[{x:100, y:25},{x:100, y:75},{x:100, y:125},{x:100, y:175}],[{x:180, y:50},{x:180, y:100},{x:180, y:150}]];
+                for (let i = 0; i < points.length - 1; i++) {
+                    points[i].forEach(p1 => {
+                        points[i+1].forEach(p2 => {
+                            const line = document.createElementNS(ns, 'line');
+                            line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y); line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+                            line.classList.add('line');
+                            svg.appendChild(line);
+                        });
+                    });
+                }
+                points.flat().forEach((p, i) => {
+                    const circle = document.createElementNS(ns, 'circle');
+                    circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y); circle.setAttribute('r', 4);
+                    circle.classList.add('node');
+                    circle.style.animationDelay = `${Math.random() * 2}s`;
+                    svg.appendChild(circle);
+                });
+            }
+            
+            function buildDnaDashboard() {
+                const topicsContainer = document.getElementById('recommended-topics');
+                if(topicsContainer) {
+                    topicsContainer.innerHTML = '';
+                    materialTopicsData.forEach(topic => {
+                        const topicEl = document.createElement('div');
+                        topicEl.className = 'p-3 bg-gray-100/50 rounded-lg font-semibold flex justify-between items-center cursor-pointer hover:bg-gray-200/50 transition-colors';
+                        topicEl.innerHTML = `<div class="flex items-center"><span class="font-bold text-teal-600 w-6 text-center">${topic.id}.</span><span class="ml-2">${topic.name}</span></div> <span class="text-xs font-bold text-${topic.color}-500 ml-2">(${topic.type})</span>`;
+                        topicEl.onclick = () => showDetailView(topic.name);
+                        topicsContainer.appendChild(topicEl);
+                    });
+                }
+                createMaterialityMatrix('materiality-matrix-dna', materialTopicsData);
+                buildFrameworkSelector('framework-selection-dna');
+            }
+
+            if(addLinkBtn) addLinkBtn.addEventListener('click', addNewLinkInput);
+            
+            if(beginAnalysisBtn) beginAnalysisBtn.addEventListener('click', () => {
+                switchStage('2');
+                createNeuralNet();
+                const checklist = document.getElementById('checklist');
+                const steps = ['Reading source documents...', 'Analyzing strategic drivers...', 'Mapping stakeholder voice...', 'Identifying narrative gaps...', 'Finalizing your DNA profile...'];
+                checklist.innerHTML = '';
+                steps.forEach((step, index) => {
+                    setTimeout(() => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center opacity-0 transition-opacity duration-500';
+                        item.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>${step}</span>`;
+                        checklist.appendChild(item);
+                        setTimeout(() => item.classList.remove('opacity-0'), 10);
+                    }, index * 1000);
+                });
+                setTimeout(() => {
+                    buildDnaDashboard();
+                    switchStage('3');
+                }, (steps.length + 0.5) * 1000);
+            });
+            
+            if(configurePlanBtn) configurePlanBtn.addEventListener('click', () => {
+                 document.getElementById('action-plan-title').textContent = "Your ESG Action Plan";
+                 document.getElementById('action-plan-subtitle').textContent = "Based on your DNA, these are the key priorities and metrics to focus on.";
+                 document.getElementById('sidebar-icon-dna').classList.remove('active');
+                 document.getElementById('sidebar-icon-plan').classList.add('active');
+                 document.getElementById('sidebar-icon-plan').querySelector('svg').style.stroke = 'white';
+                 document.getElementById('sidebar-icon-dna').querySelector('svg').style.stroke = 'var(--text-light)';
+                 document.getElementById('back-to-dna-btn').style.display = 'flex';
+                 document.getElementById('back-to-focus-areas-btn').style.display = 'none';
+                 buildActionPlan('Default'); // Default for DNA path
+                 switchStage('5');
+            });
+
+            if(seeRecommendationBtn) seeRecommendationBtn.addEventListener('click', () => {
+                 buildJumpstartSelectors();
+                 switchStage('5a');
+            });
+
+            if(generateActionPlanBtn) generateActionPlanBtn.addEventListener('click', () => {
+                 const selectedIndustry = document.getElementById('industry').value;
+                 document.getElementById('briefing-section').classList.remove('hidden');
+                 document.getElementById('action-plan-title').textContent = "Industry Strategic Briefing";
+                 document.getElementById('action-plan-subtitle').textContent = "Here is an overview of common goals, priorities, and metrics for your sector.";
+                 document.getElementById('sidebar-icon-dna').classList.remove('active');
+                 document.getElementById('sidebar-icon-plan').classList.add('active');
+                 document.getElementById('sidebar-icon-plan').querySelector('svg').style.stroke = 'white';
+                 document.getElementById('sidebar-icon-dna').querySelector('svg').style.stroke = 'var(--text-light)';
+                 document.getElementById('back-to-dna-btn').style.display = 'none';
+                 document.getElementById('back-to-focus-areas-btn').style.display = 'flex';
+                 buildActionPlan(selectedIndustry);
+                 switchStage('5');
+            });
+            
+            addNewLinkInput();
+            checkInputs();
+            createRadarChart();
+            switchStage('0');
         });
+    })();
     </script>
 </body>
 </html>
